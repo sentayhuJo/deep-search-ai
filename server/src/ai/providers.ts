@@ -21,9 +21,9 @@ const customModel = process.env.OPENAI_MODEL;
 // Models
 
 export const o3MiniModel = openai(
-  isCustomEndpoint && customModel ? customModel : 'o3-mini',
+  isCustomEndpoint && customModel ? customModel : 'gpt-4o-mini',
   {
-    reasoningEffort: 'medium',
+    // reasoningEffort: 'medium',
     structuredOutputs: true,
   },
 );
