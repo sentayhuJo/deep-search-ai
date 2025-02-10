@@ -3,5 +3,5 @@ services:
     build: .
     env_file:
       - .env.local
-    tty: true
-    stdin_open: true
+    ports:
+      - "3001:3001"
