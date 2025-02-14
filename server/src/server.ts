@@ -3,7 +3,7 @@ import cors from 'cors';
 import { deepResearch, writeFinalReport } from './helpers/deep-research';
 import { generateFeedback } from './helpers/feedback';
 
-const app = express();
+export const app = express();
 app.use(express.json());
 app.use(cors());
 
@@ -64,7 +64,10 @@ ${followUpPart}
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Express server running on port ${PORT}`);
-});
+// Only call listen if this file is run directly
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}

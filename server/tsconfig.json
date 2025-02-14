@@ -9,11 +9,14 @@
     "lib": ["es2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2022"
-  }
+    "target": "ES2022",
+    "types": ["mocha", "chai", "node"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*", "test/**/*"]
 }
