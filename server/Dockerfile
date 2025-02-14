@@ -1,25 +1,31 @@
-# Use an official Node.js image (version 22 as specified)
-FROM node:22
+# Build stage
+FROM node:20-alpine AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
-
-
-# This allows Docker to cache the npm install step if these files haven't changed.
 COPY package*.json ./
+RUN npm ci
 
-# (Optional) Copy environment file if needed
-COPY .env.local ./
-
-# Install dependencies (use --production flag for production builds)
-RUN npm install --production
-
-# Now copy the rest of your application code
 COPY . .
+RUN npm run build
 
-# Expose the port your server listens on (adjust if necessary, e.g., 3001)
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+
+# Copy built files
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Expose the port
 EXPOSE 3001
 
-# Define the command to run your server.
-CMD ["npm", "run", "server"]
+# Start the server
+CMD ["node", "dist/server.js"]
 
