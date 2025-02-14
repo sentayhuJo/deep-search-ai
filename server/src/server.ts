@@ -4,8 +4,17 @@ import { deepResearch, writeFinalReport } from './helpers/deep-research';
 import { generateFeedback } from './helpers/feedback';
 
 export const app = express();
+
+// Configure CORS before other middleware
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://research-assistant-client.fly.dev'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
 app.use(express.json());
-app.use(cors());
 
 interface ResearchRequestBody {
   initialQuery: string;
@@ -64,9 +73,14 @@ ${followUpPart}
   }
 });
 
+// Add health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Only call listen if this file is run directly
 if (require.main === module) {
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

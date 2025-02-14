@@ -1,0 +1,52 @@
+name: Deploy to Fly.io
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy apps
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Build and deploy client
+      - name: Build client
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Deploy client
+        working-directory: ./client
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only
+
+      # Build and deploy server
+      - name: Build server
+        working-directory: ./server
+        run: |
+          npm ci
+          
+      - name: Deploy server
+        working-directory: ./server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
+          FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
+          CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
+        run: flyctl deploy --remote-only 

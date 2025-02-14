@@ -1,0 +1,15 @@
+{
+  "name": "ai-research-assistant",
+  "version": "1.0.0",
+  "description": "AI-powered research assistant with interactive Q&A",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run server",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build && cd ../server && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
