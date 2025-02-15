@@ -2,7 +2,7 @@ name: Deploy to Fly.io
 on:
   push:
     branches:
-      - monolitic-dev
+      - main
 
 jobs:
   deploy:
@@ -15,7 +15,7 @@ jobs:
       FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
       CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
       VITE_API_URL: "https://research-assistant-server.fly.dev/research"
-      NODE_ENV: "production"
+      NODE_ENV: "production"  # for runtime; we'll override for builds
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -26,7 +26,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install Flyctl using the official Fly.io Action
       - name: Install Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
 
@@ -35,13 +34,14 @@ jobs:
       #############################
       - name: Install Client Dependencies
         working-directory: ./client
-        run: |
-          npm install
-          npm install --save-dev @types/react @types/react-dom
+        env:
+          NODE_ENV: development
+        run: npm ci
 
       - name: Build Client
         working-directory: ./client
         env:
+          NODE_ENV: development
           VITE_API_URL: ${{ env.VITE_API_URL }}
         run: npm run build
 
@@ -61,17 +61,19 @@ jobs:
       #############################
       - name: Install Server Dependencies
         working-directory: ./server
+        env:
+          NODE_ENV: development
         run: npm ci
 
       - name: Build Server
         working-directory: ./server
         env:
+          NODE_ENV: development
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
           FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
           CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
-          NODE_ENV: ${{ env.NODE_ENV }}
         run: npm run build
 
       - name: Create Server Fly App (if needed)
