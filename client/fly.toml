@@ -6,7 +6,7 @@ primary_region = "lax"
 
 [env]
   PORT = "80"
-  VITE_API_URL = "https://research-assistant-api.fly.dev/research"
+  VITE_API_URL = "https://research-assistant-server.fly.dev/research"
 
 [http_service]
   internal_port = 80

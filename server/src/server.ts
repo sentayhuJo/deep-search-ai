@@ -73,7 +73,7 @@ ${followUpPart}
 
 // Add health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).send('OK');
 });
 
 // Only call listen if this file is run directly
