@@ -83,7 +83,7 @@ app.get('/health', (_, res) => {
 // ES modules way to check if this is the main module
 const currentFile = fileURLToPath(import.meta.url);
 if (currentFile === process.argv[1]) {
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
   app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
   });

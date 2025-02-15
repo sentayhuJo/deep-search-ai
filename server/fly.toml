@@ -5,11 +5,11 @@ primary_region = "sin"
   dockerfile = "Dockerfile"
 
 [env]
-  PORT = "8080"
+  PORT = "3001"
   NODE_ENV = "production"
 
 [http_service]
-  internal_port = 8080
+  internal_port = 3001
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
@@ -17,15 +17,15 @@ primary_region = "sin"
   processes = ["app"]
 
 [[services.ports]]
-  port = 8080
+  internal_port = 3001
+  port = 3001
   handlers = ["http"]
   force_https = true
 
 [[services.http_checks]]
   interval = "30s"
-  timeout = "10s"
-  grace_period = "60s"
+  timeout = "5s"
+  grace_period = "30s"
   method = "GET"
   path = "/health"
   protocol = "http"
-  restart_limit = 3 
