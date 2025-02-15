@@ -1,17 +1,15 @@
 import express from 'express';
 import cors from 'cors';
-import { deepResearch, writeFinalReport } from './helpers/deep-research';
-import { generateFeedback } from './helpers/feedback';
+import { deepResearch, writeFinalReport } from './helpers/deep-research.js';
+import { generateFeedback } from './helpers/feedback.js';
 
 export const app = express();
 
-// Configure CORS before other middleware
+// Simple CORS setup (less secure)
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://research-assistant-client.fly.dev'],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -79,7 +77,7 @@ app.get('/health', (req, res) => {
 });
 
 // Only call listen if this file is run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const port = process.env.PORT || 3001;
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

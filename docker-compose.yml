@@ -22,7 +22,7 @@ services:
       - PORT=3001
       - NODE_ENV=production
     env_file:
-      - ./server/.env
+      - ./server/.env.local
 
 networks:
   default:
