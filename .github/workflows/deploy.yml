@@ -26,6 +26,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Install Flyctl using the official Fly.io Action
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
       #############################
       # Client Build & Deployment #
       #############################
