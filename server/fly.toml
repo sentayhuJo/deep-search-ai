@@ -22,10 +22,10 @@ primary_region = "sin"
   handlers = ["http"]
   force_https = true
 
-#[[services.http_checks]]
-#  interval = "30s"
-#  timeout = "5s"
-#  grace_period = "60s"
-#  method = "GET"
-#  path = "/health"
-#  protocol = "http"
+[[services.http_checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "60s"
+  method = "GET"
+  path = "/health"
+  protocol = "https"
