@@ -5,11 +5,11 @@ primary_region = "sin"
   dockerfile = "Dockerfile"
 
 [env]
-  PORT = "3001"
+  PORT = "8080"
   NODE_ENV = "production"
 
 [http_service]
-  internal_port = 3001
+  internal_port = 8080
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
@@ -17,7 +17,7 @@ primary_region = "sin"
   processes = ["app"]
 
 [[services.ports]]
-  port = 3001
+  port = 8080
   handlers = ["http"]
   force_https = true
 
