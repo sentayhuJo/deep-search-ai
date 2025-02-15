@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
 import { deepResearch, writeFinalReport } from './helpers/deep-research.js';
 import { generateFeedback } from './helpers/feedback.js';
 
@@ -72,12 +73,18 @@ ${followUpPart}
 });
 
 // Add health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+app.get('/health', (_, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Only call listen if this file is run directly
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
-});
+// ES modules way to check if this is the main module
+const currentFile = fileURLToPath(import.meta.url);
+if (currentFile === process.argv[1]) {
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
