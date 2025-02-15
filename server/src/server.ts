@@ -18,11 +18,10 @@ interface ResearchRequestBody {
   initialQuery: string;
   breadth?: number;
   depth?: number;
-  // Optionally, an array of answers corresponding to follow-up questions.
   followUpAnswers?: string[];
 }
 
-app.post('/research', async (req: express.Request, res: express.Response): Promise<void> => {
+app.post('/research', async (req, express.Response res): Promise<void> => {
   const { initialQuery, breadth, depth, followUpAnswers } = req.body as ResearchRequestBody;
   
   if (!initialQuery) {
@@ -30,17 +29,13 @@ app.post('/research', async (req: express.Request, res: express.Response): Promi
     return;
   }
 
-  // Generate follow-up questions based solely on the initial query.
   const followUpQuestions = await generateFeedback({ query: initialQuery });
   
-  // If the client has not provided follow-up answers, return the generated questions.
   if (!followUpAnswers) {
     res.json({ followUpQuestions });
     return;
   }
 
-  // Otherwise, combine the initial query with the follow-up questions and the provided answers.
-  // Here we assume the order of answers corresponds to the order of generated questions.
   const followUpPart = followUpQuestions
     .map((question, i) => `Q: ${question}\nA: ${followUpAnswers[i] || ''}`)
     .join('\n');
@@ -71,15 +66,14 @@ ${followUpPart}
   }
 });
 
-// Add health check endpoint
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
 // Only call listen if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = process.env.PORT || 3001;
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
+});
+
