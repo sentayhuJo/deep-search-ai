@@ -15,7 +15,7 @@ jobs:
       FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
       CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
       VITE_API_URL: "https://research-assistant-server.fly.dev/research"
-      NODE_ENV: "production"  # for runtime; we'll override for builds
+      NODE_ENV: "production"  # used at runtime; builds override to development
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -46,7 +46,9 @@ jobs:
         run: npm run build
 
       - name: Create Client Fly App (if needed)
-        run: flyctl apps create research-assistant-client || true
+        working-directory: ./client
+        run: |
+          flyctl apps create research-assistant-client --org lelucynet || echo "Client app already exists"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -77,7 +79,9 @@ jobs:
         run: npm run build
 
       - name: Create Server Fly App (if needed)
-        run: flyctl apps create research-assistant-server || true
+        working-directory: ./server
+        run: |
+          flyctl apps create research-assistant-server --org lelucynet || echo "Server app already exists"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
