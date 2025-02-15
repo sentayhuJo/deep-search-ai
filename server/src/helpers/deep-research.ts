@@ -4,8 +4,8 @@ import { compact } from 'lodash-es';
 import pLimit from 'p-limit';
 import { z } from 'zod';
 
-import { o3MiniModel, trimPrompt } from '../ai/providers';
-import { systemPrompt } from './prompt';
+import { o3MiniModel, trimPrompt } from '../ai/providers.js';
+import { systemPrompt } from './prompt.js';
 
 type ResearchResult = {
   learnings: string[];
