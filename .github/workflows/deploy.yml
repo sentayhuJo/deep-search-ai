@@ -1,52 +1,95 @@
 name: Deploy to Fly.io
-
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
-    name: Deploy apps
     runs-on: ubuntu-latest
-    
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+      FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
+      FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
+      CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
+      VITE_API_URL: "https://research-assistant-server.fly.dev/research"
+      NODE_ENV: "production"
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js with caching
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Fly CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
+      # Install Flyctl using the official Fly.io Action
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
 
-      # Build and deploy client
-      - name: Build client
+      #############################
+      # Client Build & Deployment #
+      #############################
+      - name: Install Client Dependencies
         working-directory: ./client
-        run: |
-          npm ci
-          npm run build
-          
-      - name: Deploy client
+        run: npm ci
+
+      - name: Build Client
         working-directory: ./client
         env:
+          VITE_API_URL: ${{ env.VITE_API_URL }}
+        run: npm run build
+
+      - name: Create Client Fly App (if needed)
+        run: flyctl apps create research-assistant-client || true
+        env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy Client to Fly.io
+        working-directory: ./client
         run: flyctl deploy --remote-only
-
-      # Build and deploy server
-      - name: Build server
-        working-directory: ./server
-        run: |
-          npm ci
-          
-      - name: Deploy server
-        working-directory: ./server
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      #############################
+      # Server Build & Deployment #
+      #############################
+      - name: Install Server Dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Build Server
+        working-directory: ./server
+        env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
           FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
           CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
-        run: flyctl deploy --remote-only 
+          NODE_ENV: ${{ env.NODE_ENV }}
+        run: npm run build
+
+      - name: Create Server Fly App (if needed)
+        run: flyctl apps create research-assistant-server || true
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Set Server Secrets
+        working-directory: ./server
+        run: |
+          flyctl secrets set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+          flyctl secrets set OPENAI_MODEL="${{ secrets.OPENAI_MODEL }}"
+          flyctl secrets set FIRECRAWL_KEY="${{ secrets.FIRECRAWL_KEY }}"
+          flyctl secrets set FIRECRAWL_BASE_URL="${{ secrets.FIRECRAWL_BASE_URL }}"
+          flyctl secrets set CONTEXT_SIZE="${{ secrets.CONTEXT_SIZE }}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy Server to Fly.io
+        working-directory: ./server
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
