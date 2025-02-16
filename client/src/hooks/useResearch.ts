@@ -24,7 +24,7 @@ export function useResearch() {
     setMessages((prev) => [...prev, { sender: 'user', text: query }]);
     
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/research`, {
+      const res = await fetch('/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initialQuery: query, breadth: 4, depth: 2 })
