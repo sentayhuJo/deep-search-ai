@@ -34,15 +34,6 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
-      - name: Update Client Secrets
-        working-directory: ./client
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: |
-          flyctl secrets set \
-            VITE_API_URL="${{ secrets.VITE_API_URL }}" \
-            --app deep-research-frontend
-
       - name: Deploy Client to Fly.io
         working-directory: ./client
         env:
