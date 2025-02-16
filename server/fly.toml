@@ -1,8 +1,12 @@
-app = "research-assistant-server"
-primary_region = "sin"
+# fly.toml app configuration file generated for deep-research-api on 2025-02-16T18:04:17Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'deep-research-api'
+primary_region = 'lhr'
 
 [build]
-  dockerfile = "Dockerfile"
 
 [env]
   PORT = "3001"
@@ -11,34 +15,22 @@ primary_region = "sin"
 [http_service]
   internal_port = 3001
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
 
 [checks]
-  # Name this check however you like
-  [checks.http_status]
+  # Health check to confirm your server is up and responding
+  [checks.server_check]
     type = "http"
     port = 3001
-    method = "GET"
     path = "/health"
     interval = "30s"
     timeout = "5s"
     grace_period = "60s"
 
-[[services.ports]]
-  internal_port = 3001
-  port = 443
-  handlers = ["tls", "http"]
-  force_https = true
-
-[[services.ports]]
-  internal_port = 3001
-  port = 80
-  handlers = ["http"]
-
 [[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
+  memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1

@@ -1,7 +1,0 @@
-services:
-  deep-research:
-    build: .
-    env_file:
-      - .env.local
-    ports:
-      - "3001:3001"

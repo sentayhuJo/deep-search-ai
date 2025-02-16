@@ -1,103 +1,71 @@
 name: Deploy to Fly.io
+
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
+    name: Deploy apps
     runs-on: ubuntu-latest
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-      FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
-      FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
-      CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
-      VITE_API_URL: "https://research-assistant-server.fly.dev/research"
-      NODE_ENV: "production"  # used at runtime; builds override to development
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js with caching
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install Flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@v1
+        uses: superfly/flyctl-actions/setup-flyctl@master
 
       #############################
       # Client Build & Deployment #
       #############################
       - name: Install Client Dependencies
         working-directory: ./client
-        env:
-          NODE_ENV: development
         run: npm ci
 
       - name: Build Client
         working-directory: ./client
         env:
-          NODE_ENV: development
-          VITE_API_URL: ${{ env.VITE_API_URL }}
+          VITE_API_URL: "https://deep-research-api.fly.dev"
         run: npm run build
-
-      - name: Create Client Fly App (if needed)
-        working-directory: ./client
-        run: |
-          flyctl apps create research-assistant-client --org lelucynet || echo "Client app already exists"
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy Client to Fly.io
         working-directory: ./client
-        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --app deep-research-frontend
 
       #############################
       # Server Build & Deployment #
       #############################
       - name: Install Server Dependencies
         working-directory: ./server
-        env:
-          NODE_ENV: development
         run: npm ci
 
       - name: Build Server
         working-directory: ./server
-        env:
-          NODE_ENV: development
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-          FIRECRAWL_KEY: ${{ secrets.FIRECRAWL_KEY }}
-          FIRECRAWL_BASE_URL: ${{ secrets.FIRECRAWL_BASE_URL }}
-          CONTEXT_SIZE: ${{ secrets.CONTEXT_SIZE }}
         run: npm run build
 
-      - name: Create Server Fly App (if needed)
+      - name: Update Server Secrets
         working-directory: ./server
-        run: |
-          flyctl apps create research-assistant-server --org lelucynet || echo "Server app already exists"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-      - name: Set Server Secrets
-        working-directory: ./server
         run: |
-          flyctl secrets set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
-          flyctl secrets set OPENAI_MODEL="${{ secrets.OPENAI_MODEL }}"
-          flyctl secrets set FIRECRAWL_KEY="${{ secrets.FIRECRAWL_KEY }}"
-          flyctl secrets set FIRECRAWL_BASE_URL="${{ secrets.FIRECRAWL_BASE_URL }}"
-          flyctl secrets set CONTEXT_SIZE="${{ secrets.CONTEXT_SIZE }}"
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          flyctl secrets set \
+            OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            OPENAI_MODEL="${{ secrets.OPENAI_MODEL }}" \
+            FIRECRAWL_KEY="${{ secrets.FIRECRAWL_KEY }}" \
+            FIRECRAWL_BASE_URL="${{ secrets.FIRECRAWL_BASE_URL }}" \
+            CONTEXT_SIZE="${{ secrets.CONTEXT_SIZE }}" \
+            --app deep-research-api
 
       - name: Deploy Server to Fly.io
         working-directory: ./server
-        run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --app deep-research-api

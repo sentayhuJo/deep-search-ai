@@ -1,31 +1,38 @@
-app = "research-assistant-client"
-primary_region = "lax"
+# fly.toml app configuration file generated for deep-research-frontend on 2025-02-16T18:14:45Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'deep-research-frontend'
+primary_region = 'lhr'
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
   PORT = "80"
-  VITE_API_URL = "https://research-assistant-server.fly.dev/research"
+  VITE_API_URL = "https://deep-research-api.fly.dev/research"
 
 [http_service]
   internal_port = 80
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 1
-  processes = ["app"]
-
-[[vm]]
-  memory = "1gb"
-  cpu_kind = "shared"
-  cpus = 1
+  min_machines_running = 0
+  processes = ['app']
 
 [checks]
-  [checks.static_check]
+  # This block is for Fly Machines (Apps V2) health checks.
+  [checks.static_site]
     type = "http"
     port = 80
-    path = "/"
+    method = "GET"
+    path = "/"          # or "/health", if you have a dedicated health endpoint
     interval = "30s"
     timeout = "5s"
     grace_period = "30s"
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
