@@ -30,8 +30,6 @@ jobs:
 
       - name: Build Client
         working-directory: ./client
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
       - name: Deploy Client to Fly.io
