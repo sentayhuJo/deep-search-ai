@@ -24,11 +24,18 @@ export function useResearch() {
     setMessages((prev) => [...prev, { sender: 'user', text: query }]);
     
     try {
-      const res = await fetch('/research', {
+      const res = await fetch(`${window.location.origin}/research`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ initialQuery: query, breadth: 4, depth: 2 })
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       
       const data = await res.json();
       if (data.followUpQuestions) {
@@ -45,10 +52,10 @@ export function useResearch() {
         }, 0);
       }
     } catch (err) {
-      console.error(err);
+      console.error('API Error:', err);
       setMessages((prev) => [...prev, { 
         sender: 'agent', 
-        text: 'Error processing request.' 
+        text: 'Error processing request. Please try again.' 
       }]);
     }
     setLoading(false);
@@ -88,9 +95,12 @@ export function useResearch() {
   const sendFinalRequest = async (answers: string[]) => {
     setLoading(true);
     try {
-      const res = await fetch('/research', {
+      const res = await fetch(`${window.location.origin}/research`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ 
           initialQuery,
           followUpQuestions,
@@ -99,6 +109,10 @@ export function useResearch() {
           depth: 2
         })
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
       const data = await res.json();
       if (data.report) {
@@ -111,7 +125,7 @@ export function useResearch() {
         setCurrentQuestionIndex(-1);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('API Error:', error);
       setMessages(prev => [...prev, { 
         sender: 'agent', 
         text: 'Sorry, there was an error generating the report. Please try again.' 
