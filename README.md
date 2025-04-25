@@ -46,7 +46,7 @@ cp .env.example .env    # Create .env file
 
 The client `.env` should contain:
 ```env
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=https://api.production.com
 ```
 
 ## Running Locally
@@ -75,7 +75,7 @@ npm run dev
 
 The application will be available at:
 - Frontend: http://localhost:5173
-- Backend: http://localhost:3001
+- Backend: https://api.production.com
 
 ## Using Docker
 
